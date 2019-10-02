@@ -4,8 +4,6 @@ from flask import Flask
 import feedparser
 import yaml
 
-import pandas as pd
-
 from google.cloud import bigquery
 import google.api_core.exceptions as google_exceptions
 
@@ -26,7 +24,6 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    
     latest_ad_date_query = queries['get_latest_ad_date']
     rss_url = config['stack_overflow_rss']
     feed = feedparser.parse(rss_url)
@@ -35,14 +32,15 @@ def hello():
 
     try:
         latest_ad_date = bq_client.query(latest_ad_date_query).result()
-        print(f'The latest ads are from {latest_ad_date.strftime('%Y-%m-%d')}.')
+        print('The latest ads are from {}.'.format(
+              latest_ad_date.strftime('%Y-%m-%d')))
     except google_exceptions.NotFound:
         latest_ad_date = None
         print('The ads table does not exist.')
 
     if latest_ad_date and latest_ad_date < data.published.max():
         data = data[data.published > latest_ad_date].copy()
-        
+
     data.to_gbq(destination_table='stack_overflow_jobs.job_ads',
                 project_id=config['project_id'],
                 if_exists='append')
