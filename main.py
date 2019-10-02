@@ -35,14 +35,19 @@ def hello():
 
     try:
         latest_ad_date = bq_client.query(latest_ad_date_query).result()
+        print(f'The latest ads are from {latest_ad_date.strftime('%Y-%m-%d')}.')
     except google_exceptions.NotFound:
         latest_ad_date = None
+        print('The ads table does not exist.')
 
     if latest_ad_date and latest_ad_date < data.published.max():
-        new_data = data[data.published > latest_ad_date].copy()
-        return f'Saving {len(new_data)} new records.'
-    else:
-        return f'Saving {len(data)} new records.'
+        data = data[data.published > latest_ad_date].copy()
+        
+    data.to_gbq(destination_table='stack_overflow_jobs.job_ads',
+                project_id=config['project_id'],
+                if_exists='append')
+
+    return f'Saved {len(data)} new records.'
 
 
 if __name__ == '__main__':
