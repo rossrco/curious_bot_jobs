@@ -4,6 +4,8 @@ from flask import Flask
 import feedparser
 import yaml
 
+import pandas as pd
+
 from google.cloud import bigquery
 import google.api_core.exceptions as google_exceptions
 
@@ -26,11 +28,21 @@ app = Flask(__name__)
 def hello():
     
     latest_ad_date_query = queries['get_latest_ad_date']
+    rss_url = config['stack_overflow_rss']
+    feed = feedparser.parse(rss_url)
+
+    data = utils.convert_feed_to_frame(feed)
+
     try:
         latest_ad_date = bq_client.query(latest_ad_date_query).result()
-        return latest_ad_date.strftime(format='%Y-%m-%d')
     except google_exceptions.NotFound:
-        return 'The table does not exist'
+        latest_ad_date = None
+
+    if latest_ad_date and latest_ad_date < data.published.max():
+        new_data = data[data.published > latest_ad_date].copy()
+        return f'Saving {len(new_data)} new records.'
+    else:
+        return f'Saving {len(data)} new records.'
 
 
 if __name__ == '__main__':
