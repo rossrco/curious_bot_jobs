@@ -105,3 +105,6 @@ venv.bak/
 
 # config files
 config.yaml
+
+# gcloudignore
+.gcloudignore
