@@ -1,3 +1,4 @@
-select
-    max(published)
-from `the-curious-bot.stack-overflow-jobs.job-ads`
+SELECT
+  MAX(published)
+FROM
+  `curious-bot.stack_overflow.ads`

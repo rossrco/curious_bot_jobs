@@ -1,0 +1,6 @@
+cron:
+  - description: extract job ads
+    url: /
+    schedule: every day 08:00
+    timezone: Europe/Berlin
+    target: default
