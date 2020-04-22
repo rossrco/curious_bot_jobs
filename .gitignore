@@ -111,3 +111,6 @@ config.yaml
 
 # json files
 *.json
+
+# experiments and prototypes
+/experiments
